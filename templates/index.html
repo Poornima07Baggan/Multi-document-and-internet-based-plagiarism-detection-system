@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Plagiarism Detection</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+            background-attachment: fixed !important;
+            min-height: 100vh;
+            color: #f8fafc;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+        .navbar-glass { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+        .hero-section { padding: 100px 0 60px; }
+        .upload-card { background: #ffffff; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); padding: 3rem; color: #1e293b; border: 1px solid rgba(255, 255, 255, 0.1); transform: translateY(0); transition: transform 0.3s ease; }
+        .upload-card:hover { transform: translateY(-5px); }
+        .dashboard-card { background: #ffffff; border-radius: 20px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); padding: 2.5rem; margin-bottom: 2.5rem; color: #1e293b; text-align: left; }
+        .btn-gradient { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; border: none; font-weight: 600; border-radius: 12px; transition: all 0.3s ease; }
+        .btn-gradient:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(99, 102, 241, 0.4); color: white; }
+        .feature-icon { font-size: 2.5rem; background: -webkit-linear-gradient(135deg, #6366f1, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .auth-btn { font-size: 1.1rem; font-weight: 600; padding: 0.6rem 1.8rem; border-radius: 50px; border-width: 2px; }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg py-3 navbar-glass fixed-top">
+        <div class="container d-flex justify-content-between align-items-center">
+            <a class="navbar-brand fw-bold fs-3 text-white text-decoration-none d-flex align-items-center" href="/">
+                <i class="bi bi-shield-check text-info me-2 fs-2"></i> Plagiarism AI
+            </a>
+            <div class="d-flex align-items-center">
+                <div class="dropdown">
+                    <button class="btn btn-outline-light auth-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle me-2"></i> System Login
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2" style="border-radius: 12px; min-width: 200px;">
+                        <li><a class="dropdown-item py-2 fw-bold fs-6" href="/student-login"><i class="bi bi-mortarboard-fill me-2 text-success"></i> Student Portal</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item py-2 fw-bold fs-6" href="/teacher-login"><i class="bi bi-briefcase-fill me-2 text-danger"></i> Teacher Portal</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container hero-section text-center" style="margin-top: 60px;">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <h1 class="display-4 fw-bold text-white mb-4" style="letter-spacing: -1px;">
+                    Ensure Academic Integrity with <span style="color: #8b5cf6;">AI-Powered</span> Scanning
+                </h1>
+                <p class="lead text-light opacity-75 mb-5 fs-4">
+                    Upload documents to instantly cross-check them against the internet and detect peer-to-peer copying with pinpoint accuracy.
+                </p>
+
+                <div class="upload-card mx-auto text-center mb-5" style="max-width: 650px;">
+                    <div class="d-inline-block bg-primary bg-opacity-10 p-4 rounded-circle mb-4">
+                        <i class="bi bi-cloud-arrow-up-fill text-primary" style="font-size: 3rem;"></i>
+                    </div>
+                    <h3 class="fw-bold mb-3">Quick Plagiarism Scan</h3>
+                    <p class="text-muted mb-4 fs-5">Select one file to check the internet, or multiple files to check against each other.</p>
+
+                    <form action="/compare" method="post" enctype="multipart/form-data">
+                        <div class="mb-4 text-start">
+                            <input type="file" name="files" class="form-control form-control-lg bg-light border-2" style="padding: 1rem;" multiple required>
+                        </div>
+                        <button type="submit" class="btn btn-gradient btn-lg w-100 py-3 shadow fs-5">
+                            <i class="bi bi-cpu-fill me-2"></i> Run Deep Scan
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="row justify-content-center" id="report-content">
+            <div class="col-lg-10">
+
+                {% if error %}
+                <div class="alert alert-danger shadow-sm border-0 py-3 fs-5 text-center fw-medium mb-5">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ error }}
+                </div>
+                {% endif %}
+
+                {% if results or internet_results or ai_report %}
+
+                    {% if internet_results %}
+                    <div class="dashboard-card bg-white mb-4 mx-auto" style="border-left: 5px solid #dc3545 !important; padding: 1.5rem; box-shadow: 0 10px 30px rgba(220,53,69,0.15);">
+                        <h5 class="fw-bold text-danger mb-3"><i class="bi bi-globe-americas me-2"></i> Internet Plagiarism Detected</h5>
+                        <p class="mb-3 text-dark">Exact phrase matches were found online for the following documents:</p>
+                        <div class="row">
+                            {% for filename, urls in internet_results.items() %}
+                            <div class="col-md-6 mb-3">
+                                <div class="card border-danger h-100 bg-light">
+                                    <div class="card-header bg-danger text-white py-2 fw-bold">
+                                        <i class="bi bi-file-earmark-text me-2"></i>{{ filename }}
+                                    </div>
+                                    <ul class="list-group list-group-flush">
+                                        {% for url in urls %}
+                                        <li class="list-group-item text-truncate">
+                                            <a href="{{ url }}" target="_blank" class="text-danger fw-medium text-decoration-none">
+                                                <i class="bi bi-link-45deg me-1"></i>{{ url }}
+                                            </a>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if ai_report %}
+                    <div class="dashboard-card bg-info bg-opacity-10 border-info mb-4 mx-auto" style="padding: 1.5rem;">
+                        <h5 class="fw-bold text-info mb-3">
+                            <i class="bi bi-robot me-2"></i> AI Investigator's Executive Summary
+                        </h5>
+                        <p class="mb-0 text-dark fw-medium" style="line-height: 1.6;">
+                            {{ ai_report }}
+                        </p>
+                    </div>
+                    {% endif %}
+
+                    {% if results %}
+                    <div class="dashboard-card mt-4 mx-auto">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-success bg-opacity-10 p-3 rounded-circle me-3"><i class="bi bi-bar-chart-fill text-success fs-4"></i></div>
+                                <h4 class="mb-0 fw-bold">Analysis Results</h4>
+                            </div>
+                            <button onclick="downloadPDF()" class="btn btn-danger fw-bold shadow-sm"><i class="bi bi-filetype-pdf me-2"></i> Download PDF</button>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                {% for file1, file2, score in results %}
+                                <div class="mb-4 p-3 border rounded bg-light">
+                                    <p class="mb-2 fw-medium"><i class="bi bi-file-text me-2"></i><strong>{{ file1 }}</strong> <span class="text-muted mx-2">vs</span> <strong>{{ file2 }}</strong></p>
+                                    <div class="progress" style="height: 25px; border-radius: 8px;">
+                                        <div class="progress-bar progress-dynamic fw-bold" data-score="{{ score }}"></div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6"><canvas id="chart"></canvas></div>
+                        </div>
+
+                        {% if detailed_comparisons %}
+                        <div class="mt-5" id="side-by-side-section">
+                            <h4 class="mb-4 fw-bold text-dark"><i class="bi bi-layout-split text-primary me-2"></i> Document Comparison</h4>
+                            {% for comp in detailed_comparisons %}
+                            <div class="card mb-4 border-0 shadow-sm overflow-hidden">
+                                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3">
+                                    <span class="fs-5"><strong>{{ comp.file1 }}</strong> <span class="text-muted mx-2">vs</span> <strong>{{ comp.file2 }}</strong></span>
+                                    <span class="badge bg-danger fs-6">{{ comp.score }}% Match</span>
+                                </div>
+                                <div class="card-body row g-0 p-0">
+                                    <div class="col-md-6 p-4 border-end bg-light" style="max-height: 500px; overflow-y: auto;">
+                                        <p style="white-space: pre-wrap; font-size: 0.95rem; line-height: 1.8; color: #333;">{{ comp.text1 | safe }}</p>
+                                    </div>
+                                    <div class="col-md-6 p-4 bg-white" style="max-height: 500px; overflow-y: auto;">
+                                        <p style="white-space: pre-wrap; font-size: 0.95rem; line-height: 1.8; color: #333;">{{ comp.text2 | safe }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                {% endif %}
+            </div>
+        </div>
+
+        {% if not results and not internet_results and not error and not ai_report %}
+        <div class="row mt-3 pt-5 text-center">
+            <div class="col-md-4 mb-4 px-4">
+                <i class="bi bi-globe2 feature-icon mb-3 d-block"></i>
+                <h4 class="fw-bold text-white">Live Web Scraping</h4>
+                <p class="text-light opacity-75">Cross-references text against billions of web pages to find exact phrase matches instantly.</p>
+            </div>
+            <div class="col-md-4 mb-4 px-4">
+                <i class="bi bi-people-fill feature-icon mb-3 d-block"></i>
+                <h4 class="fw-bold text-white">Peer-to-Peer Check</h4>
+                <p class="text-light opacity-75">Upload a whole class batch. We mathematically compare every file against each other.</p>
+            </div>
+            <div class="col-md-4 mb-4 px-4">
+                <i class="bi bi-robot feature-icon mb-3 d-block"></i>
+                <h4 class="fw-bold text-white">AI Investigator</h4>
+                <p class="text-light opacity-75">Google Gemini Vision synthesizes the results to generate plain-English reports for educators.</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    {% if results %}
+    <script>
+        document.querySelectorAll('.progress-dynamic').forEach(bar => {
+            let val = parseFloat(bar.getAttribute('data-score'));
+            if (!isNaN(val)) {
+                bar.style.width = val + "%";
+                if (val <= 15.0) { bar.classList.add('bg-success'); bar.innerText = val + "% (Safe)"; }
+                else if (val <= 30.0) { bar.classList.add('bg-warning', 'text-dark'); bar.innerText = val + "% (Review)"; }
+                else { bar.classList.add('bg-danger'); bar.innerText = val + "% (Flagged)"; }
+            }
+        });
+
+        const rawDataStr = '{{ results | tojson | safe }}';
+        if (rawDataStr && rawDataStr !== '""' && rawDataStr !== 'null') {
+            const rawData = JSON.parse(rawDataStr);
+            if (rawData && rawData.length > 0) {
+                const chartLabels = rawData.map(row => row[0] + " vs " + row[1]);
+                const chartScores = rawData.map(row => row[2]);
+                const chartColors = chartScores.map(score => score <= 15.0 ? 'rgba(25, 135, 84, 0.8)' : (score <= 30.0 ? 'rgba(255, 193, 7, 0.8)' : 'rgba(220, 53, 69, 0.8)'));
+                new Chart(document.getElementById('chart').getContext('2d'), {
+                    type: 'bar',
+                    data: { labels: chartLabels, datasets: [{ label: 'Plagiarism Score (%)', data: chartScores, backgroundColor: chartColors, borderRadius: 6 }] },
+                    options: { responsive: true, scales: { y: { beginAtZero: true, max: 100 } }, plugins: { legend: { display: false } } }
+                });
+            }
+        }
+
+        function downloadPDF() {
+            const element = document.getElementById('report-content');
+            if (!element) return;
+            const btn = element.querySelector('button');
+            if (btn) btn.style.display = 'none';
+            const sideBySide = document.getElementById('side-by-side-section');
+            if (sideBySide) sideBySide.style.display = 'none';
+
+            const opt = { margin: 0.4, filename: 'Plagiarism_Report.pdf', jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' } };
+
+            if (window.pywebview) {
+                html2pdf().set(opt).from(element).outputPdf('datauristring').then(function(pdfBase64) {
+                    window.pywebview.api.save_pdf(pdfBase64).then(() => {
+                        if (btn) btn.style.display = 'block';
+                        if (sideBySide) sideBySide.style.display = 'block';
+                    });
+                });
+            } else {
+                html2pdf().set(opt).from(element).save().then(() => {
+                    if (btn) btn.style.display = 'block';
+                    if (sideBySide) sideBySide.style.display = 'block';
+                }).catch(err => {
+                    alert("Error generating PDF.");
+                });
+            }
+        }
+    </script>
+    {% endif %}
+
+</body>
+</html>
