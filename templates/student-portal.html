@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Teacher Portal Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    </head>
+    <title>Student Portal Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+            background-attachment: fixed !important;
+            min-height: 100vh;
+            color: #f8fafc;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+        .navbar-glass {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .dashboard-card {
+            background: #ffffff; border-radius: 20px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1); padding: 2.5rem; margin-bottom: 2.5rem; color: #1e293b;
+        }
+        .table-dark th { background-color: #334155; color: #f8fafc; font-weight: 600; border-bottom: none; padding: 1rem; }
+        .table td { padding: 1rem; vertical-align: middle; }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg py-3 mb-5 navbar-glass">
+        <div class="container d-flex justify-content-between align-items-center">
+            <a class="navbar-brand fw-bold fs-4 text-white text-decoration-none" href="/">
+                <i class="bi bi-shield-check text-info"></i> Plagiarism Detection
+            </a>
+            <div class="d-flex align-items-center">
+                <span class="text-light fw-medium me-4"><i class="bi bi-person-circle me-2"></i> Student: {{ current_user.username }}</span>
+                <a class="btn btn-danger btn-sm rounded-pill px-4 fw-bold shadow-sm" href="/logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mb-5">
+
+        <div class="text-center mb-5">
+            <h1 class="fw-bold text-white mb-2" style="font-size: 2.5rem; letter-spacing: -1px;">🎓 Student Dashboard</h1>
+            <p class="text-info">Join subjects, view specific assignments, and submit your work.</p>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-4 mb-4">
+                <div class="dashboard-card h-100">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="bg-primary bg-opacity-10 p-3 rounded-circle me-3">
+                            <i class="bi bi-door-open-fill text-primary fs-4"></i>
+                        </div>
+                        <h4 class="mb-0 fw-bold">Join a Subject</h4>
+                    </div>
+                    <p class="text-muted">Enter the 6-digit invite code provided by your teacher.</p>
+                    
+                    <form action="/join_course" method="POST" class="mt-4">
+                        <div class="input-group">
+                            <input type="text" name="invite_code" class="form-control form-control-lg text-uppercase font-monospace" placeholder="e.g. SQ9UES" required>
+                            <button type="submit" class="btn btn-primary fw-bold px-4">Join</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-lg-8 mb-4">
+                <div class="dashboard-card h-100" style="max-height: 500px; overflow-y: auto;">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="bg-warning bg-opacity-10 p-3 rounded-circle me-3">
+                            <i class="bi bi-journal-text text-warning fs-4"></i>
+                        </div>
+                        <h4 class="mb-0 fw-bold">My Active Assignments</h4>
+                    </div>
+
+                    <div class="row">
+                        {% for t in tasks %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card bg-light border-0 shadow-sm h-100" style="border-left: 4px solid #6366f1 !important;">
+                                <div class="card-body">
+                                    <h5 class="fw-bold text-dark mb-0">{{ t.title }}</h5>
+                                    <p class="text-primary small fw-bold mb-2"><i class="bi bi-folder me-1"></i>{{ t.course_name }}</p>
+                                    
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <span class="text-muted small"><i class="bi bi-person-badge me-1"></i>{{ t.teacher_name }}</span>
+                                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1">
+                                            Due: {{ t.deadline }}
+                                        </span>
+                                    </div>
+
+                                    <form action="/upload_assignment" method="POST" enctype="multipart/form-data">
+                                        <input type="hidden" name="course_id" value="{{ t.course_id }}">
+                                        <input type="hidden" name="task_id" value="{{ t.id }}">
+                                        <div class="input-group input-group-sm">
+                                            <input type="file" name="file" class="form-control bg-white" required>
+                                            <button type="submit" class="btn btn-success fw-bold"><i class="bi bi-cloud-upload"></i> Upload</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="col-12 text-center py-4">
+                            <i class="bi bi-inbox text-muted opacity-50" style="font-size: 3rem;"></i>
+                            <p class="text-muted mt-2">No active assignments given by your teachers.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-card mx-auto">
+            <div class="d-flex align-items-center mb-4">
+                <div class="bg-success bg-opacity-10 p-3 rounded-circle me-3">
+                    <i class="bi bi-award-fill text-success fs-4"></i>
+                </div>
+                <h4 class="mb-0 fw-bold">My Submitted Work</h4>
+            </div>
+
+            <div class="table-responsive" style="border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0;">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Subject & Assignment</th>
+                            <th>My File</th>
+                            <th>Status</th>
+                            <th>Score / Feedback</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for a in assignments %}
+                        <tr>
+                            <td>
+                                <span class="badge bg-secondary fs-6 mb-1">{{ a.course_name }}</span><br>
+                                <span class="fw-bold text-dark"><i class="bi bi-arrow-return-right text-muted me-1"></i>{{ a.task_title if a.task_title else 'General Upload' }}</span>
+                            </td>
+                            <td><i class="bi bi-file-earmark-text text-primary me-2"></i>{{ a.filename }}</td>
+                            
+                            <td>
+                                {% if a.status == 'Pending' %}
+                                    <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i>Under Review</span>
+                                {% else %}
+                                    <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Graded</span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if a.status == 'Graded' %}
+                                    <div class="fw-bold text-success fs-5">{{ a.marks }} / {{ a.total_marks if a.total_marks else 100 }}</div>
+                                    <div class="text-muted small fst-italic">"{{ a.comments }}"</div>
+                                {% else %}
+                                    <span class="text-muted fst-italic">Awaiting teacher...</span>
+                                {% endif %}
+                            </td>
+                            
+                            <td>
+                                {% if a.status == 'Pending' %}
+                                <form action="/delete_assignment/{{ a.id }}" method="POST" onsubmit="return confirm('Delete this submission?');">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash3"></i> Unsubmit</button>
+                                </form>
+                                {% else %}
+                                <button class="btn btn-light btn-sm text-muted" disabled><i class="bi bi-lock-fill"></i> Locked</button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">No assignments submitted yet.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>
