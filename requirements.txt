@@ -6,5 +6,6 @@ python-docx
 google-generativeai
 beautifulsoup4
 requests
-sentence-transformers
+scikit-learn
 gunicorn
+
