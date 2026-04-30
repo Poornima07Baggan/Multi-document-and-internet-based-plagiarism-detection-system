@@ -1,23 +1,15 @@
-from sentence_transformers import SentenceTransformer
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-# 🤖 LOAD THE ML MODEL (Loads once when server starts to keep the app fast)
-# 'all-MiniLM-L6-v2' is a lightweight, super-fast model perfect for catching paraphrasing!
-print("Loading Machine Learning Paraphrasing Model... (This may take a few seconds)")
-semantic_model = SentenceTransformer('all-MiniLM-L6-v2')
-
-def calculate_similarity(documents):
-    """
-    Takes a list of document texts, converts them to semantic vectors, 
-    and returns a matrix of their similarity scores.
-    """
-    if not documents:
-        return []
+def calculate_similarity(text1, text2):
+    try:
+        if not text1.strip() or not text2.strip():
+            return 0.0
         
-    # 1. Convert all text into mathematical meaning (Embeddings)
-    embeddings = semantic_model.encode(documents)
-    
-    # 2. Calculate how close the meanings are to each other (Cosine Similarity)
-    similarity_matrix = cosine_similarity(embeddings)
-    
-    return similarity_matrix
+        vectorizer = TfidfVectorizer()
+        tfidf = vectorizer.fit_transform([text1, text2])
+        sim = cosine_similarity(tfidf[0:1], tfidf[1:2])
+        return round(float(sim[0][0]) * 100, 2)
+    except Exception as e:
+        print(f"Error: {e}")
+        return 0.0
