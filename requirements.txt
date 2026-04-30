@@ -1,7 +1,9 @@
 Flask
-gunicorn
-scikit-learn
-nltk
-numpy
-pandas
+Flask-Login
+Werkzeug
+PyPDF2
+python-docx
+google-generativeai
+beautifulsoup4
+requests
 gunicorn
